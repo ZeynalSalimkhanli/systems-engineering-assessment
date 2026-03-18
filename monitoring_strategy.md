@@ -1,22 +1,93 @@
 # Task 2: Monitoring Strategy for High-Traffic SSL Proxy
 
 ## System Analysis
-- **Hardware:** 4x Intel Xeon E7-4830 v4, 64GB RAM, 2x10Gbit/s NICs.
-- **Workload:** SSL Offloading at 25,000 Requests Per Second (RPS).
+- **Hardware:** 4x Intel Xeon E7-4830 v4, 64GB RAM, 2x10Gbit/s NICs
+- **Workload:** SSL Offloading at 25,000 Requests Per Second (RPS)
+
+---
 
 ## 1. Key Metrics to Monitor
-* **Network PPS (Packets Per Second):** At 25k RPS, monitoring PPS is more critical than just bandwidth. High PPS can saturate the CPU's interrupt handling before the 10Gbps link is full.
-* **SSL/TLS Handshake Latency:** This measures the efficiency of the SSL offloading. Any spike indicates that the Xeon CPUs are struggling with cryptographic operations.
-* **CPU Softirqs:** Crucial for high-traffic servers. It shows how much time CPUs spend handling network packets. We must ensure load is balanced across all 4 CPUs.
-* **TCP Connection States:** Monitoring `ESTABLISHED` and `TIME_WAIT` counts to prevent ephemeral port exhaustion, which is common at 25k RPS.
-* **Disk I/O Wait:** Since the server has HDDs, logging 25k requests/sec can cause I/O bottlenecks. Monitoring 'iowait' is essential.
+
+### CPU & System
+- **CPU Utilization (%user, %system)**
+- **Load Average**
+- **CPU Softirqs:** Critical for handling high packet rates
+- **Context Switches**
+
+### Memory
+- **RAM Usage**
+- **Buffer/Cache Usage**
+- **Swap Usage**
+
+### Network
+- **Packets Per Second (PPS):** More critical than bandwidth at high RPS
+- **Bandwidth Utilization**
+- **Packet Drops / Errors**
+- **NIC Utilization**
+
+### TCP / Connections
+- **TCP Connection States (ESTABLISHED, TIME_WAIT)**
+- **Connection Rate (new connections/sec)**
+
+### Application-Level Metrics
+- **Request Rate (RPS)**
+- **Latency (p50, p95, p99)**
+- **HTTP Error Rates (4xx, 5xx)**
+- **SSL/TLS Handshake Latency**
+- **TLS Session Reuse Rate**
+
+### Disk
+- **Disk I/O Wait**
+- **Read/Write Throughput**
+
+---
 
 ## 2. Methodology & Tools
-* **Prometheus + Node Exporter:** For collecting hardware and OS-level metrics.
-* **Nginx/HAProxy Exporter:** To gather application-specific metrics like active connections and error rates (4xx/5xx).
-* **Grafana:** For real-time visualization and setting up critical alerts.
 
-## 3. Monitoring Challenges
-* **The Observer Effect:** The monitoring agent itself must be extremely lightweight; otherwise, the act of monitoring could crash a server already under 25k RPS load.
-* **Log Bursting:** Writing logs for 25,000 events/sec will quickly exhaust the 2TB HDD. Log rotation and sampling strategies are required.
-* **Data Granularity:** Standard 1-minute scraping might miss micro-bursts that cause temporary service outages.
+- **Prometheus + Node Exporter**
+  - Collect system-level metrics (CPU, memory, disk, network)
+
+- **Nginx / HAProxy Exporter**
+  - Application metrics (RPS, latency, error rates)
+
+- **Grafana**
+  - Dashboards for real-time visualization
+
+---
+
+## 3. Alerting Strategy
+
+- CPU usage > 80% for 5 minutes
+- High SSL handshake latency
+- Increase in HTTP 5xx errors
+- High number of TIME_WAIT connections
+- Packet drops or NIC saturation
+
+---
+
+## 4. Monitoring Challenges
+
+### High Traffic Load
+- 25k RPS generates massive metric volume
+
+### SSL Overhead
+- CPU-intensive cryptographic operations
+
+### Observer Effect
+- Monitoring must be lightweight to avoid impacting performance
+
+### Log Bursting
+- Writing logs at high rate can overwhelm HDD
+- Requires log rotation, sampling, or centralized logging
+
+### Data Granularity
+- Short spikes may be missed with large scrape intervals
+
+---
+
+## 5. Summary
+
+Effective monitoring requires:
+- Multi-layer visibility (system + network + application)
+- Efficient data collection (low overhead)
+- Smart alerting to avoid noise
