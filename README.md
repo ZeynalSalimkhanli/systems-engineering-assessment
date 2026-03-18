@@ -4,7 +4,7 @@ This repository contains solutions for automation and monitoring tasks, focusing
 
 ---
 
-## Task 1: Random Number Generator
+## 🚀 Task 1: Random Number Generator
 
 ### Description
 A Bash script that generates numbers from 1 to 10 in a random order without repetition. Each execution ensures all numbers appear exactly once.
@@ -53,7 +53,7 @@ chmod +x random_gen.sh
 
 ---
 
-## Task 2: Monitoring Strategy
+## 📊 Task 2: Monitoring Strategy
 
 ### Overview
 A monitoring design for a high-load SSL proxy server handling approximately 25,000 requests per second (RPS).
