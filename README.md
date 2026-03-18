@@ -69,7 +69,7 @@ The full monitoring strategy, including:
 
 is documented here:
 
-👉 **monitoring_strategy.md**
+**👉 [View Monitoring Strategy](./monitoring_strategy.md)**
 
 ---
 
